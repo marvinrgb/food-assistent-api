@@ -11,5 +11,67 @@ datasource db {
 }
 
 model Default {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DefaultItem {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  unit        String   // e.g., "kg", "pieces", "liters"
+  category    String   // e.g., "dairy", "vegetables", "meat"
+  description String?
+  defaultExpiryDays Int? // default expiry period in days
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  items       Item[]   // relation to actual inventory items
+}
+
+model House {
+  id          Int       @id @default(autoincrement())
+  name        String
+  address     String?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  rooms       Room[]
+}
+
+model Room {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  floor       Int?
+  houseId     Int
+  house       House       @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  containers  Container[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Container {
+  id          Int      @id @default(autoincrement())
+  name        String
+  type        String?  // e.g., "fridge", "pantry", "freezer", "cabinet"
+  description String?
+  roomId      Int
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  items       Item[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Item {
+  id            Int         @id @default(autoincrement())
+  quantity      Int         @default(1)
+  expiryDate    DateTime?
+  notes         String?
+  defaultItemId Int
+  defaultItem   DefaultItem @relation(fields: [defaultItemId], references: [id])
+  containerId   Int
+  container     Container   @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
